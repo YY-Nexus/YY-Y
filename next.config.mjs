@@ -1,12 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['nodemailer'],
-  env: {
-    FEEDBACK_EMAIL: process.env.FEEDBACK_EMAIL,
-    SMTP_HOST: process.env.SMTP_HOST,
-    SMTP_PORT: process.env.SMTP_PORT,
-    SMTP_USER: process.env.SMTP_USER,
-    SMTP_PASS: process.env.SMTP_PASS,
+  experimental: {
+    appDir: true,
+  },
+  images: {
+    domains: ['localhost', 'vercel.app'],
+    unoptimized: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -14,23 +13,42 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  images: {
-    unoptimized: false,
-    remotePatterns: [
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+      }
+    }
+    return config
+  },
+  env: {
+    CUSTOM_KEY: 'my-value',
+  },
+  async headers() {
+    return [
       {
-        protocol: 'https',
-        hostname: '**',
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+        ],
       },
-    ],
-    formats: ['image/webp', 'image/avif'],
+    ]
   },
-  experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
-  },
-  // 启用 gzip 压缩
-  compress: true,
-  // 优化静态文件缓存
-  poweredByHeader: false,
 }
 
 export default nextConfig

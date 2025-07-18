@@ -29,13 +29,21 @@ export default function YanYuCloudCubePlatform() {
   const [isMobile, setIsMobile] = useState(false)
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [showChatModal, setShowChatModal] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const leftPanelTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const rightPanelTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  // 客户端检测
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   // 检测屏幕尺寸
   useEffect(() => {
+    if (!isClient) return
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
@@ -44,7 +52,7 @@ export default function YanYuCloudCubePlatform() {
     window.addEventListener("resize", checkMobile)
 
     return () => window.removeEventListener("resize", checkMobile)
-  }, [])
+  }, [isClient])
 
   // 核心功能模块定义 - AI创作与开发工具
   const coreModules = [
@@ -184,6 +192,8 @@ export default function YanYuCloudCubePlatform() {
 
   // 监听键盘和鼠标事件
   useEffect(() => {
+    if (!isClient) return
+
     const handleKeyPress = (e: KeyboardEvent) => {
       if (!showChatModal && e.key !== "Tab" && e.key !== "Shift" && e.key !== "Control" && e.key !== "Alt") {
         setShowChatModal(true)
@@ -237,7 +247,7 @@ export default function YanYuCloudCubePlatform() {
       if (leftPanelTimeoutRef.current) clearTimeout(leftPanelTimeoutRef.current)
       if (rightPanelTimeoutRef.current) clearTimeout(rightPanelTimeoutRef.current)
     }
-  }, [lastActivity, inputValue, isListening, showChatModal, showReminder, reminderPhase])
+  }, [lastActivity, inputValue, isListening, showChatModal, showReminder, reminderPhase, isClient])
 
   // 智能推荐系统
   useEffect(() => {
@@ -331,6 +341,15 @@ export default function YanYuCloudCubePlatform() {
     setIsIdle(true)
   }
 
+  // 服务端渲染时显示加载状态
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-xl">加载中...</div>
+      </div>
+    )
+  }
+
   return (
     <div
       ref={containerRef}
@@ -351,8 +370,8 @@ export default function YanYuCloudCubePlatform() {
             key={i}
             className="absolute w-1 h-1 bg-white rounded-full opacity-60"
             animate={{
-              x: [0, Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1920)],
-              y: [0, Math.random() * (typeof window !== "undefined" ? window.innerHeight : 1080)],
+              x: [0, Math.random() * (window?.innerWidth || 1920)],
+              y: [0, Math.random() * (window?.innerHeight || 1080)],
               opacity: [0, 0.8, 0],
             }}
             transition={{

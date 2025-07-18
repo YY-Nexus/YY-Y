@@ -1,24 +1,20 @@
 {
-  "buildCommand": "pnpm build",
-  "devCommand": "pnpm dev",
-  "installCommand": "pnpm install",
+  "version": 2,
   "framework": "nextjs",
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install --frozen-lockfile",
   "functions": {
     "app/api/feedback/route.ts": {
-      "maxDuration": 30,
-      "memory": 1024
+      "maxDuration": 30
     },
     "app/api/network/test/route.ts": {
-      "maxDuration": 60,
-      "memory": 1024
-    },
-    "app/api/health/route.ts": {
-      "maxDuration": 10,
-      "memory": 512
+      "maxDuration": 60
     },
     "app/api/monitor/route.ts": {
-      "maxDuration": 10,
-      "memory": 512
+      "maxDuration": 10
+    },
+    "app/api/health/route.ts": {
+      "maxDuration": 5
     }
   },
   "headers": [
@@ -43,7 +39,15 @@
         },
         {
           "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains; preload"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https: wss:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
         }
       ]
     },
@@ -52,7 +56,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-store, max-age=0"
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
         },
         {
           "key": "Access-Control-Allow-Origin",
@@ -60,20 +64,15 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
+          "value": "GET, POST, PUT, DELETE, OPTIONS, PATCH"
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization, X-Requested-With"
-        }
-      ]
-    },
-    {
-      "source": "/api/health",
-      "headers": [
+          "value": "Content-Type, Authorization, X-Requested-With, X-API-Key, X-Client-Version"
+        },
         {
-          "key": "Cache-Control",
-          "value": "public, max-age=60"
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
         }
       ]
     },
@@ -85,19 +84,43 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
+    },
+    {
+      "source": "/images/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, s-maxage=31536000"
+        }
+      ]
     }
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "source": "/health",
+      "destination": "/api/health"
+    },
+    {
+      "source": "/status",
+      "destination": "/api/health"
     }
   ],
   "redirects": [
     {
-      "source": "/health",
-      "destination": "/api/health",
-      "permanent": false
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "NEXT_TELEMETRY_DISABLED": "1"
+  },
+  "regions": ["iad1", "hkg1", "sfo1"],
+  "crons": [
+    {
+      "path": "/api/monitor",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

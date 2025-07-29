@@ -43,8 +43,6 @@ export function SmartModulePanel({
   const [scrollPosition, setScrollPosition] = useState(0)
   const [canScrollUp, setCanScrollUp] = useState(false)
   const [canScrollDown, setCanScrollDown] = useState(true)
-  const [isHovered, setIsHovered] = useState(false)
-  const [autoHideTimer, setAutoHideTimer] = useState<NodeJS.Timeout | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [isScrolling, setIsScrolling] = useState(false)
 
@@ -56,41 +54,6 @@ export function SmartModulePanel({
   // 计算可见区域高度
   const VISIBLE_HEIGHT = isMobile ? window.innerHeight - 200 : window.innerHeight - 100
   const VISIBLE_ITEMS = Math.floor(VISIBLE_HEIGHT / ITEM_HEIGHT)
-
-  // 自动隐藏逻辑优化
-  useEffect(() => {
-    if (isVisible && !isHovered && !isMobile) {
-      // 3秒后自动隐藏
-      const timer = setTimeout(() => {
-        if (!isHovered) {
-          // 这里需要通知父组件隐藏面板
-          // 由于我们没有直接的隐藏回调，我们通过鼠标离开事件来模拟
-          const event = new MouseEvent("mouseleave", { bubbles: true })
-          document.dispatchEvent(event)
-        }
-      }, 3000)
-
-      setAutoHideTimer(timer)
-
-      return () => {
-        if (timer) clearTimeout(timer)
-      }
-    }
-  }, [isVisible, isHovered, isMobile])
-
-  // 鼠标进入处理
-  const handleMouseEnter = () => {
-    setIsHovered(true)
-    if (autoHideTimer) {
-      clearTimeout(autoHideTimer)
-      setAutoHideTimer(null)
-    }
-  }
-
-  // 鼠标离开处理
-  const handleMouseLeave = () => {
-    setIsHovered(false)
-  }
 
   // 更新滚动状态
   const updateScrollState = (newPosition: number) => {
@@ -165,8 +128,6 @@ export function SmartModulePanel({
             position === "left" ? "left-16" : "right-16",
             isMobile ? "w-72" : "w-80",
           )}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
         >
           {/* 主面板容器 - 调整为微透明紫色背景 */}
           <div className="flex-1 flex flex-col bg-purple-900/20 backdrop-blur-xl border border-purple-500/20 shadow-2xl rounded-2xl">
@@ -188,18 +149,6 @@ export function SmartModulePanel({
               <p className="text-white/70 text-sm mt-1">
                 {position === "left" ? "AI创作与开发工具" : "即将推出的智能服务"}
               </p>
-
-              {/* 自动隐藏提示 */}
-              {!isMobile && !isHovered && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-xs text-white/50 mt-2 flex items-center gap-1"
-                >
-                  <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse" />
-                  3秒后自动收回
-                </motion.div>
-              )}
             </div>
 
             {/* 滚动控制按钮 - 上 */}

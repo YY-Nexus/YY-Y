@@ -54,7 +54,7 @@ export function ImageCreationModule() {
   }
 
   return (
-    <div className="h-full flex gap-6 p-6">
+    <div className="h-full flex gap-6">
       {/* 左侧控制面板 */}
       <div className="w-80 space-y-4 overflow-y-auto">
         <Card className="bg-white/5 border-white/10">

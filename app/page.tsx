@@ -29,21 +29,13 @@ export default function YanYuCloudCubePlatform() {
   const [isMobile, setIsMobile] = useState(false)
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [showChatModal, setShowChatModal] = useState(false)
-  const [isClient, setIsClient] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const leftPanelTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const rightPanelTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // 客户端检测
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
   // 检测屏幕尺寸
   useEffect(() => {
-    if (!isClient) return
-
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
@@ -52,9 +44,9 @@ export default function YanYuCloudCubePlatform() {
     window.addEventListener("resize", checkMobile)
 
     return () => window.removeEventListener("resize", checkMobile)
-  }, [isClient])
+  }, [])
 
-  // 核心功能模块定义 - AI创作与开发工具
+  // 核心功能模块定义
   const coreModules = [
     {
       id: "image-creation",
@@ -103,7 +95,7 @@ export default function YanYuCloudCubePlatform() {
     },
   ]
 
-  // 智能服务模块 - 即将推出的智能服务
+  // 智能服务模块
   const smartModules = [
     {
       id: "smart-home",
@@ -173,7 +165,7 @@ export default function YanYuCloudCubePlatform() {
   const handleLeftPanelLeave = () => {
     leftPanelTimeoutRef.current = setTimeout(() => {
       setShowLeftPanel(false)
-    }, 500)
+    }, 300)
   }
 
   // 右侧面板悬浮控制
@@ -187,13 +179,11 @@ export default function YanYuCloudCubePlatform() {
   const handleRightPanelLeave = () => {
     rightPanelTimeoutRef.current = setTimeout(() => {
       setShowRightPanel(false)
-    }, 500)
+    }, 300)
   }
 
   // 监听键盘和鼠标事件
   useEffect(() => {
-    if (!isClient) return
-
     const handleKeyPress = (e: KeyboardEvent) => {
       if (!showChatModal && e.key !== "Tab" && e.key !== "Shift" && e.key !== "Control" && e.key !== "Alt") {
         setShowChatModal(true)
@@ -247,7 +237,7 @@ export default function YanYuCloudCubePlatform() {
       if (leftPanelTimeoutRef.current) clearTimeout(leftPanelTimeoutRef.current)
       if (rightPanelTimeoutRef.current) clearTimeout(rightPanelTimeoutRef.current)
     }
-  }, [lastActivity, inputValue, isListening, showChatModal, showReminder, reminderPhase, isClient])
+  }, [lastActivity, inputValue, isListening, showChatModal, showReminder, reminderPhase])
 
   // 智能推荐系统
   useEffect(() => {
@@ -341,15 +331,6 @@ export default function YanYuCloudCubePlatform() {
     setIsIdle(true)
   }
 
-  // 服务端渲染时显示加载状态
-  if (!isClient) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-xl">加载中...</div>
-      </div>
-    )
-  }
-
   return (
     <div
       ref={containerRef}
@@ -370,8 +351,8 @@ export default function YanYuCloudCubePlatform() {
             key={i}
             className="absolute w-1 h-1 bg-white rounded-full opacity-60"
             animate={{
-              x: [0, Math.random() * (window?.innerWidth || 1920)],
-              y: [0, Math.random() * (window?.innerHeight || 1080)],
+              x: [0, Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1920)],
+              y: [0, Math.random() * (typeof window !== "undefined" ? window.innerHeight : 1080)],
               opacity: [0, 0.8, 0],
             }}
             transition={{
@@ -416,7 +397,7 @@ export default function YanYuCloudCubePlatform() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              言语云³
+              YanYUCloud³
             </motion.div>
 
             {/* 副标题 */}
@@ -455,7 +436,7 @@ export default function YanYuCloudCubePlatform() {
         <TopNavigationMenu isVisible={true} onMenuClick={() => {}} />
       </div>
 
-      {/* 左侧触发区域和面板组合 - 核心功能 */}
+      {/* 左侧触发区域和面板组合 */}
       <div
         data-navigation-area
         className="fixed left-0 top-0 bottom-0 z-30"
@@ -463,7 +444,7 @@ export default function YanYuCloudCubePlatform() {
         onMouseLeave={handleLeftPanelLeave}
       >
         {/* 触发区域 */}
-        <div className="w-20 h-full bg-transparent hover:bg-white/5 transition-colors duration-200" />
+        <div className="w-16 h-full bg-transparent hover:bg-white/5 transition-colors duration-200" />
 
         {/* 左侧核心功能面板 */}
         <SmartModulePanel
@@ -476,7 +457,7 @@ export default function YanYuCloudCubePlatform() {
         />
       </div>
 
-      {/* 右侧触发区域和面板组合 - 智能服务 */}
+      {/* 右侧触发区域和面板组合 */}
       {!isMobile && (
         <div
           data-navigation-area
@@ -485,7 +466,7 @@ export default function YanYuCloudCubePlatform() {
           onMouseLeave={handleRightPanelLeave}
         >
           {/* 触发区域 */}
-          <div className="w-20 h-full bg-transparent hover:bg-white/5 transition-colors duration-200" />
+          <div className="w-16 h-full bg-transparent hover:bg-white/5 transition-colors duration-200" />
 
           {/* 右侧智能服务面板 */}
           <SmartModulePanel
@@ -617,7 +598,7 @@ export default function YanYuCloudCubePlatform() {
           transition={{ duration: 0.5 }}
         >
           <div className="text-xs text-white/50 border-t border-white/10 pt-2">
-            © 2024 言语云³ · 万象归源 · 智启纪元
+            © 2024 YanYUCloud³ · 言启万象丨语枢未来
           </div>
         </motion.footer>
       )}

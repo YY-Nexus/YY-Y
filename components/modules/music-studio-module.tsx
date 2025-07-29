@@ -6,7 +6,7 @@ import { Music, Play, Volume2 } from "lucide-react"
 
 export function MusicStudioModule() {
   return (
-    <div className="h-full space-y-6 p-6">
+    <div className="h-full space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="bg-white/5 border-white/10">
           <CardHeader>

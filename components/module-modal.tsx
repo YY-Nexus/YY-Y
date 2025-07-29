@@ -24,13 +24,9 @@ import {
   Download,
   Trash2,
   CheckCircle2,
-  Lock,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { LucideIcon } from "lucide-react"
-import { ImageCreationModule } from "@/components/modules/image-creation-module"
-import { VideoHubModule } from "@/components/modules/video-hub-module"
-import { MusicStudioModule } from "@/components/modules/music-studio-module"
 
 interface Module {
   id: string
@@ -217,53 +213,6 @@ export function ModuleModal({ moduleId, isOpen, onClose, modules }: ModuleModalP
 
   const IconComponent = module.icon
   const modalSize = getModalSize()
-
-  const renderModuleContent = () => {
-    switch (moduleId) {
-      case "image-creation":
-        return <ImageCreationModule />
-      case "video-hub":
-        return <VideoHubModule />
-      case "music-studio":
-        return <MusicStudioModule />
-      case "code-assistant":
-        return (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center text-white/60">
-              <IconComponent className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg mb-2">代码助手</p>
-              <p className="text-sm">智能编程助手功能正在开发中</p>
-            </div>
-          </div>
-        )
-      case "ai-engine":
-        return (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center text-white/60">
-              <IconComponent className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg mb-2">AI引擎</p>
-              <p className="text-sm">统一AI模型调用平台功能正在开发中</p>
-            </div>
-          </div>
-        )
-      default:
-        return (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center text-white/60">
-              <IconComponent className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg mb-2">{module.title}</p>
-              <p className="text-sm">{module.description}</p>
-              {module.disabled && (
-                <Badge variant="outline" className="mt-4 bg-amber-400/20 border-amber-400/40 text-amber-200">
-                  <Lock className="w-3 h-3 mr-1" />
-                  即将推出
-                </Badge>
-              )}
-            </div>
-          </div>
-        )
-    }
-  }
 
   return (
     <AnimatePresence>

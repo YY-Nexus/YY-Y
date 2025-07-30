@@ -96,7 +96,7 @@ export function PrivacyConsentModal({ isOpen, onConsent, onDecline }: PrivacyCon
                           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                           <div>
                             <h4 className="font-semibold text-blue-800">数据安全</h4>
-                            <p className="text-sm text-blue-700">采用加密技术保护数据传输</p>
+                            <p className="text-sm text-blue-700">采用加密技术保护数据���输</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200">

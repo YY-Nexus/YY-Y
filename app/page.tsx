@@ -154,7 +154,7 @@ export default function YanYuCloudCubePlatform() {
     "好无聊呀，快来和我聊天嘛～ (´･ω･`)",
   ]
 
-  // 左侧面板悬浮控制
+  // 左侧面板悬浮控制 - 修复自动缩回功能
   const handleLeftPanelEnter = () => {
     if (leftPanelTimeoutRef.current) {
       clearTimeout(leftPanelTimeoutRef.current)
@@ -165,10 +165,10 @@ export default function YanYuCloudCubePlatform() {
   const handleLeftPanelLeave = () => {
     leftPanelTimeoutRef.current = setTimeout(() => {
       setShowLeftPanel(false)
-    }, 300)
+    }, 500) // 增加延迟时间，避免过快缩回
   }
 
-  // 右侧面板悬浮控制
+  // 右侧面板悬浮控制 - 修复自动缩回功能
   const handleRightPanelEnter = () => {
     if (rightPanelTimeoutRef.current) {
       clearTimeout(rightPanelTimeoutRef.current)
@@ -179,7 +179,7 @@ export default function YanYuCloudCubePlatform() {
   const handleRightPanelLeave = () => {
     rightPanelTimeoutRef.current = setTimeout(() => {
       setShowRightPanel(false)
-    }, 300)
+    }, 500) // 增加延迟时间，避免过快缩回
   }
 
   // 监听键盘和鼠标事件
@@ -386,32 +386,43 @@ export default function YanYuCloudCubePlatform() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            {/* 主标题 */}
+            {/* 主标题 - 优化字体样式 */}
             <motion.div
-              className="text-white/90 font-light tracking-wider"
+              className="text-white/90 font-bold italic tracking-wider"
               style={{
-                fontSize: isMobile ? "2rem" : "clamp(2.5rem, 5vw, 4rem)",
+                fontSize: isMobile ? "1.75rem" : "clamp(2.25rem, 4.5vw, 3.5rem)",
                 lineHeight: 1.2,
+                fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
+                textShadow: "0 4px 20px rgba(147, 51, 234, 0.3)",
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              YanYUCloud³
+              <span className="bg-gradient-to-r from-purple-300 via-pink-300 to-cyan-300 bg-clip-text text-transparent">
+                YanY
+              </span>
+              <span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent text-[0.85em]">
+                u
+              </span>
+              <span className="bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
+                Cloud³
+              </span>
             </motion.div>
 
-            {/* 副标题 */}
+            {/* 副标题 - 更新文字内容 */}
             <motion.div
               className="text-white/80 font-medium"
               style={{
                 fontSize: isMobile ? "1rem" : "clamp(1.125rem, 2.5vw, 1.5rem)",
                 lineHeight: 1.4,
+                letterSpacing: "0.05em",
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1 }}
             >
-              万象归源于云枢，深栈智启新纪元
+              万象归元于云枢 丨 深栈智启新纪元
             </motion.div>
 
             {/* 提示文字 */}
@@ -436,7 +447,7 @@ export default function YanYuCloudCubePlatform() {
         <TopNavigationMenu isVisible={true} onMenuClick={() => {}} />
       </div>
 
-      {/* 左侧触发区域和面板组合 */}
+      {/* 左侧触发区域和面板组合 - 修复自动缩回 */}
       <div
         data-navigation-area
         className="fixed left-0 top-0 bottom-0 z-30"
@@ -447,17 +458,19 @@ export default function YanYuCloudCubePlatform() {
         <div className="w-16 h-full bg-transparent hover:bg-white/5 transition-colors duration-200" />
 
         {/* 左侧核心功能面板 */}
-        <SmartModulePanel
-          modules={coreModules}
-          position="left"
-          isVisible={showLeftPanel}
-          isMobile={isMobile}
-          onModuleClick={handleModuleClick}
-          fullDisplay={false}
-        />
+        <div onMouseEnter={handleLeftPanelEnter} onMouseLeave={handleLeftPanelLeave}>
+          <SmartModulePanel
+            modules={coreModules}
+            position="left"
+            isVisible={showLeftPanel}
+            isMobile={isMobile}
+            onModuleClick={handleModuleClick}
+            fullDisplay={false}
+          />
+        </div>
       </div>
 
-      {/* 右侧触发区域和面板组合 */}
+      {/* 右侧触发区域和面板组合 - 修复自动缩回 */}
       {!isMobile && (
         <div
           data-navigation-area
@@ -469,14 +482,16 @@ export default function YanYuCloudCubePlatform() {
           <div className="w-16 h-full bg-transparent hover:bg-white/5 transition-colors duration-200" />
 
           {/* 右侧智能服务面板 */}
-          <SmartModulePanel
-            modules={smartModules}
-            position="right"
-            isVisible={showRightPanel}
-            isMobile={isMobile}
-            onModuleClick={handleModuleClick}
-            disabled={true}
-          />
+          <div onMouseEnter={handleRightPanelEnter} onMouseLeave={handleRightPanelLeave}>
+            <SmartModulePanel
+              modules={smartModules}
+              position="right"
+              isVisible={showRightPanel}
+              isMobile={isMobile}
+              onModuleClick={handleModuleClick}
+              disabled={true}
+            />
+          </div>
         </div>
       )}
 
@@ -598,7 +613,7 @@ export default function YanYuCloudCubePlatform() {
           transition={{ duration: 0.5 }}
         >
           <div className="text-xs text-white/50 border-t border-white/10 pt-2">
-            © 2024 YanYUCloud³ · 言启万象丨语枢未来
+            © 2024 YanYuCloud³ · 言启万象丨语枢未来
           </div>
         </motion.footer>
       )}

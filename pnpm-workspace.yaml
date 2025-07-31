@@ -1,2 +1,44 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  '@ai-sdk/openai':
+    specifier: ^0.0.66
+    version: 0.0.66(zod@3.24.1)
+  '@hookform/resolvers':
+    specifier: ^3.3.2
+    version: 3.3.4(react-hook-form@7.48.2)
+  '@radix-ui/react-accordion':
+    specifier: ^1.1.2
+    version: 1.1.2(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.2.0)
+  # ... 更多依赖项
+  ai:
+    specifier: ^3.4.32
+    version: 3.4.32(react@18.2.0)(zod@3.24.1)
+  autoprefixer:
+    specifier: ^10.4.16
+    version: 10.4.20(postcss@8.4.32)
+  # ... 继续列出所有依赖项
+
+devDependencies:
+  '@testing-library/jest-dom':
+    specifier: ^6.1.5
+    version: 6.1.6
+  '@testing-library/react':
+    specifier: ^14.1.2
+    version: 14.1.2(react-dom@18.2.0)(react@18.2.0)
+  # ... 更多开发依赖项
+
 packages:
-  - '.'
+  # 这里会包含所有包的详细信息和版本锁定
+  /@ai-sdk/openai@0.0.66:
+    resolution: {integrity: sha512-...}
+    peerDependencies:
+      zod: ^3.0.0
+    dependencies:
+      zod: 3.24.1
+    dev: false
+  # ... 数百行的包信息

@@ -247,7 +247,7 @@ interface MLStack {
 \`\`\`typescript
 // 数据分层架构
 interface DataArchitecture {
-  // 数据收集层
+  // ��据收集层
   ingestion: {
     realtime: "Apache Kafka" | "Amazon Kinesis"
     batch: "Apache Airflow" | "Prefect"

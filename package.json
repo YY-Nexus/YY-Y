@@ -98,5 +98,9 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.5",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.17.0",
+    "pnpm": ">=8.0.0"
   }
 }

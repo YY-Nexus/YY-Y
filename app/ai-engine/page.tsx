@@ -81,7 +81,7 @@ export default function AIEnginePage() {
       "zhipu-ai": "您好！我是智谱AI，很高兴为您服务。我可以帮助您进行文本生成、代码编写、数学推理等任务。",
       ollama:
         "Hello! I'm running locally on Ollama. I can help you with various tasks while keeping your data private.",
-      deepseek: "我是DeepSeek代码助手，专门帮助您解决编程相关的问题，包括代码生成、优化和解释。",
+      deepseek: "我是DeepSeek代码助手，专门帮助您解决编程相关的问题，包括代码生成、优化和解释���",
       custom: "这是您的自定义模型响应，已根据您的特定需求进行了优化训练。",
     }
 

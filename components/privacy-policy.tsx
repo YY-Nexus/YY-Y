@@ -28,7 +28,7 @@ export function PrivacyPolicy({ showHeader = true, compact = false }: PrivacyPol
       title: "信息使用",
       icon: Eye,
       content: [
-        "提供网络测速、诊断、安全检测等核心服务功能",
+        "提供网络测速、诊断、安全检测等核心服务功��",
         "分析和改进服务质量，优化用户体验",
         "生成匿名化的统计报告，用于服务改进",
         "确保平台安全性，防范恶意攻击和滥用",

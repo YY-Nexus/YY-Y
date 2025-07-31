@@ -1,10 +1,31 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { User, Settings, HelpCircle, Wifi, WifiOff } from "lucide-react"
+import { motion } from "framer-motion"
+import {
+  User,
+  Settings,
+  HelpCircle,
+  Wifi,
+  WifiOff,
+  ChevronDown,
+  UserCircle,
+  Heart,
+  History,
+  LogOut,
+  Sliders,
+  Monitor,
+  Globe,
+  Keyboard,
+  Download,
+  Upload,
+  BookOpen,
+  Zap,
+  MessageCircle,
+  Phone,
+  Info,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,213 +34,220 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
 
 interface TopNavigationMenuProps {
-  isVisible: boolean
-  onMenuClick: () => void
+  className?: string
 }
 
-export function TopNavigationMenu({ isVisible, onMenuClick }: TopNavigationMenuProps) {
+export function TopNavigationMenu({ className = "" }: TopNavigationMenuProps) {
   const [isOnline, setIsOnline] = useState(true)
+  const [lastOnlineCheck, setLastOnlineCheck] = useState(Date.now())
 
+  // 网络状态检测
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
+    const checkOnlineStatus = () => {
+      setIsOnline(navigator.onLine)
+      setLastOnlineCheck(Date.now())
+    }
+
+    const handleOnline = () => checkOnlineStatus()
+    const handleOffline = () => checkOnlineStatus()
 
     window.addEventListener("online", handleOnline)
     window.addEventListener("offline", handleOffline)
 
+    // 定期检查网络状态
+    const interval = setInterval(checkOnlineStatus, 30000)
+
     return () => {
       window.removeEventListener("online", handleOnline)
       window.removeEventListener("offline", handleOffline)
+      clearInterval(interval)
     }
   }, [])
 
-  const handleUserAction = (action: string) => {
-    console.log(`用户操作: ${action}`)
-  }
-
-  const handleSettingsAction = (action: string) => {
-    console.log(`设置操作: ${action}`)
-  }
-
-  const handleHelpAction = (action: string) => {
-    console.log(`帮助操作: ${action}`)
-  }
-
-  const handleNetworkStatus = () => {
-    console.log("网络状态检查")
+  const handleNetworkCheck = async () => {
+    try {
+      const response = await fetch("/api/health", {
+        method: "HEAD",
+        cache: "no-cache",
+      })
+      setIsOnline(response.ok)
+    } catch {
+      setIsOnline(false)
+    }
+    setLastOnlineCheck(Date.now())
   }
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="fixed top-4 right-4 z-50 flex items-center gap-3"
+    <div className={`flex items-center gap-2 ${className}`}>
+      {/* 网络状态指示器 */}
+      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleNetworkCheck}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300"
         >
-          {/* 在线状态指示器 */}
-          <motion.div className="flex items-center gap-2" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Badge
-              variant="outline"
-              className={cn(
-                "transition-colors duration-300 cursor-pointer",
-                isOnline
-                  ? "text-green-400 border-green-400 bg-green-400/10 hover:bg-green-400/20"
-                  : "text-red-400 border-red-400 bg-red-400/10 hover:bg-red-400/20",
-              )}
-              onClick={handleNetworkStatus}
+          {isOnline ? <Wifi className="h-4 w-4 text-green-500" /> : <WifiOff className="h-4 w-4 text-red-500" />}
+          <Badge variant={isOnline ? "default" : "destructive"} className="text-xs px-2 py-1">
+            {isOnline ? "在线" : "离线"}
+          </Badge>
+        </Button>
+      </motion.div>
+
+      {/* 用户菜单 */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300"
             >
-              <div className="flex items-center gap-1">
-                {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-                <span className="hidden sm:inline">{isOnline ? "在线" : "离线"}</span>
-              </div>
-            </Badge>
+              <User className="h-4 w-4 text-purple-600" />
+              <ChevronDown className="h-3 w-3 text-gray-500" />
+            </Button>
           </motion.div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-56 bg-white/95 backdrop-blur-md border border-purple-200/50 shadow-xl rounded-xl"
+        >
+          <DropdownMenuLabel className="text-purple-700 font-medium">我的账户</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-purple-200/30" />
 
-          {/* 用户按钮 */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 transition-all duration-200"
-              >
-                <User className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-white/10 backdrop-blur-xl border-white/20 text-white">
-              <DropdownMenuLabel className="text-purple-200">我的账户</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/20" />
-              <DropdownMenuItem
-                onClick={() => handleUserAction("profile")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                个人资料
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleUserAction("favorites")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                我的收藏
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleUserAction("history")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                使用记录
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/20" />
-              <DropdownMenuItem
-                onClick={() => handleUserAction("logout")}
-                className="text-red-400 hover:bg-red-700/50 hover:text-red-300 cursor-pointer"
-              >
-                退出登录
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <UserCircle className="h-4 w-4 text-purple-600" />
+            <span>个人资料</span>
+          </DropdownMenuItem>
 
-          {/* 设置按钮 */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 transition-all duration-200"
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-white/10 backdrop-blur-xl border-white/20 text-white">
-              <DropdownMenuLabel className="text-purple-200">系统设置</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/20" />
-              <DropdownMenuItem
-                onClick={() => handleSettingsAction("ai")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                AI设置
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSettingsAction("interface")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                界面设置
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSettingsAction("language")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                语言设置
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSettingsAction("shortcuts")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                快捷键
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/20" />
-              <DropdownMenuItem
-                onClick={() => handleSettingsAction("export")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                导入/导出
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <Heart className="h-4 w-4 text-pink-600" />
+            <span>我的收藏</span>
+          </DropdownMenuItem>
 
-          {/* 帮助按钮 */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 transition-all duration-200"
-              >
-                <HelpCircle className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-white/10 backdrop-blur-xl border-white/20 text-white">
-              <DropdownMenuLabel className="text-purple-200">帮助与支持</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/20" />
-              <DropdownMenuItem
-                onClick={() => handleHelpAction("guide")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                使用指南
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleHelpAction("quickstart")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                快速入门
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleHelpAction("faq")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                常见问题
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleHelpAction("contact")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                联系支持
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/20" />
-              <DropdownMenuItem
-                onClick={() => handleHelpAction("about")}
-                className="text-purple-200 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                关于我们
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <History className="h-4 w-4 text-blue-600" />
+            <span>使用历史</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator className="bg-purple-200/30" />
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-red-50 cursor-pointer text-red-600">
+            <LogOut className="h-4 w-4" />
+            <span>退出登录</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* 设置菜单 */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300"
+            >
+              <Settings className="h-4 w-4 text-purple-600" />
+              <ChevronDown className="h-3 w-3 text-gray-500" />
+            </Button>
+          </motion.div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-56 bg-white/95 backdrop-blur-md border border-purple-200/50 shadow-xl rounded-xl"
+        >
+          <DropdownMenuLabel className="text-purple-700 font-medium">系统设置</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-purple-200/30" />
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <Sliders className="h-4 w-4 text-purple-600" />
+            <span>AI 设置</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <Monitor className="h-4 w-4 text-blue-600" />
+            <span>界面设置</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <Globe className="h-4 w-4 text-green-600" />
+            <span>语言设置</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <Keyboard className="h-4 w-4 text-orange-600" />
+            <span>快捷键</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator className="bg-purple-200/30" />
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <Download className="h-4 w-4 text-cyan-600" />
+            <span>导入设置</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <Upload className="h-4 w-4 text-pink-600" />
+            <span>导出设置</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* 帮助菜单 */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300"
+            >
+              <HelpCircle className="h-4 w-4 text-purple-600" />
+              <ChevronDown className="h-3 w-3 text-gray-500" />
+            </Button>
+          </motion.div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-56 bg-white/95 backdrop-blur-md border border-purple-200/50 shadow-xl rounded-xl"
+        >
+          <DropdownMenuLabel className="text-purple-700 font-medium">帮助与支持</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-purple-200/30" />
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <BookOpen className="h-4 w-4 text-purple-600" />
+            <span>使用指南</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <Zap className="h-4 w-4 text-yellow-600" />
+            <span>快速入门</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <MessageCircle className="h-4 w-4 text-blue-600" />
+            <span>常见问题</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <Phone className="h-4 w-4 text-green-600" />
+            <span>联系支持</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator className="bg-purple-200/30" />
+
+          <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 hover:bg-purple-50 cursor-pointer">
+            <Info className="h-4 w-4 text-cyan-600" />
+            <span>关于我们</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
+
+export default TopNavigationMenu

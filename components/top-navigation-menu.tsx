@@ -35,93 +35,108 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
-interface TopNavigationMenuProps {
-  className?: string
+interface NetworkStatus {
+  isOnline: boolean
+  speed: string
+  latency: number
 }
 
-export function TopNavigationMenu({ className }: TopNavigationMenuProps) {
-  const [isOnline, setIsOnline] = useState(true)
-  const [networkSpeed, setNetworkSpeed] = useState<string>("检测中...")
+export function TopNavigationMenu() {
+  const [networkStatus, setNetworkStatus] = useState<NetworkStatus>({
+    isOnline: true,
+    speed: "检测中...",
+    latency: 0,
+  })
 
-  // 网络状态检测
   useEffect(() => {
-    const updateOnlineStatus = () => {
-      setIsOnline(navigator.onLine)
+    const checkNetworkStatus = () => {
+      setNetworkStatus((prev) => ({
+        ...prev,
+        isOnline: navigator.onLine,
+      }))
     }
 
-    const checkNetworkSpeed = async () => {
-      if (!navigator.onLine) {
-        setNetworkSpeed("离线")
-        return
-      }
-
+    const measureNetworkSpeed = async () => {
       try {
-        const startTime = Date.now()
+        const startTime = performance.now()
         await fetch("/api/health", { method: "HEAD" })
-        const endTime = Date.now()
-        const latency = endTime - startTime
+        const endTime = performance.now()
+        const latency = Math.round(endTime - startTime)
 
-        if (latency < 100) {
-          setNetworkSpeed("极速")
-        } else if (latency < 300) {
-          setNetworkSpeed("良好")
-        } else if (latency < 600) {
-          setNetworkSpeed("一般")
-        } else {
-          setNetworkSpeed("较慢")
-        }
+        let speed = "良好"
+        if (latency > 1000) speed = "较慢"
+        else if (latency > 500) speed = "一般"
+        else if (latency < 100) speed = "极快"
+
+        setNetworkStatus((prev) => ({
+          ...prev,
+          speed,
+          latency,
+        }))
       } catch (error) {
-        setNetworkSpeed("异常")
+        setNetworkStatus((prev) => ({
+          ...prev,
+          speed: "离线",
+          latency: 0,
+        }))
       }
     }
 
-    // 初始检测
-    updateOnlineStatus()
-    checkNetworkSpeed()
+    checkNetworkStatus()
+    measureNetworkSpeed()
 
-    // 监听网络状态变化
-    window.addEventListener("online", updateOnlineStatus)
-    window.addEventListener("offline", updateOnlineStatus)
+    window.addEventListener("online", checkNetworkStatus)
+    window.addEventListener("offline", checkNetworkStatus)
 
-    // 定期检测网络速度
-    const speedInterval = setInterval(checkNetworkSpeed, 30000)
+    const interval = setInterval(measureNetworkSpeed, 30000)
 
     return () => {
-      window.removeEventListener("online", updateOnlineStatus)
-      window.removeEventListener("offline", updateOnlineStatus)
-      clearInterval(speedInterval)
+      window.removeEventListener("online", checkNetworkStatus)
+      window.removeEventListener("offline", checkNetworkStatus)
+      clearInterval(interval)
     }
   }, [])
 
-  const handleUserAction = (action: string) => {
-    console.log(`用户操作: ${action}`)
-    // 这里可以添加具体的用户操作逻辑
-  }
+  const userMenuItems = [
+    { icon: UserCircle, label: "个人资料", color: "text-blue-500" },
+    { icon: Heart, label: "我的收藏", color: "text-red-500" },
+    { icon: History, label: "使用历史", color: "text-green-500" },
+    { icon: LogOut, label: "退出登录", color: "text-gray-500" },
+  ]
 
-  const handleSettingsAction = (action: string) => {
-    console.log(`设置操作: ${action}`)
-    // 这里可以添加具体的设置操作逻辑
-  }
+  const settingsMenuItems = [
+    { icon: Palette, label: "AI设置", color: "text-purple-500" },
+    { icon: Palette, label: "界面设置", color: "text-pink-500" },
+    { icon: Globe, label: "语言设置", color: "text-cyan-500" },
+    { icon: Keyboard, label: "快捷键", color: "text-orange-500" },
+    { icon: Download, label: "导入数据", color: "text-green-500" },
+    { icon: Upload, label: "导出数据", color: "text-blue-500" },
+  ]
 
-  const handleHelpAction = (action: string) => {
-    console.log(`帮助操作: ${action}`)
-    // 这里可以添加具体的帮助操作逻辑
-  }
+  const helpMenuItems = [
+    { icon: BookOpen, label: "使用指南", color: "text-indigo-500" },
+    { icon: Zap, label: "快速入门", color: "text-yellow-500" },
+    { icon: MessageCircle, label: "常见问题", color: "text-green-500" },
+    { icon: Phone, label: "联系支持", color: "text-red-500" },
+    { icon: Info, label: "关于我们", color: "text-gray-500" },
+  ]
 
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className="flex items-center gap-4">
       {/* 网络状态指示器 */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-100/50 to-pink-100/50 backdrop-blur-sm border border-purple-200/30"
-      >
-        {isOnline ? <Wifi className="w-4 h-4 text-green-500" /> : <WifiOff className="w-4 h-4 text-red-500" />}
-        <span className="text-xs font-medium text-gray-700">{isOnline ? networkSpeed : "离线"}</span>
-        <Badge variant={isOnline ? "default" : "destructive"} className="text-xs px-1.5 py-0.5">
-          {isOnline ? "在线" : "离线"}
-        </Badge>
-      </motion.div>
+      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-purple-100/50 to-pink-100/50 backdrop-blur-sm">
+        {networkStatus.isOnline ? (
+          <Wifi className="w-4 h-4 text-green-500" />
+        ) : (
+          <WifiOff className="w-4 h-4 text-red-500" />
+        )}
+        <span className="text-xs font-medium text-gray-700">{networkStatus.speed}</span>
+        {networkStatus.latency > 0 && (
+          <Badge variant="secondary" className="text-xs">
+            {networkStatus.latency}ms
+          </Badge>
+        )}
+      </div>
 
       {/* 用户菜单 */}
       <DropdownMenu>
@@ -129,54 +144,26 @@ export function TopNavigationMenu({ className }: TopNavigationMenuProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="relative group hover:bg-gradient-to-r hover:from-purple-100/50 hover:to-pink-100/50 transition-all duration-300"
+            className="flex items-center gap-2 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 transition-all duration-300"
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex items-center gap-2">
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
               <User className="w-4 h-4 text-purple-600" />
-              <ChevronDown className="w-3 h-3 text-gray-500 group-hover:text-purple-600 transition-colors" />
             </motion.div>
+            <ChevronDown className="w-3 h-3 text-gray-500" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-56 bg-white/95 backdrop-blur-md border border-purple-200/30 shadow-xl"
-        >
+        <DropdownMenuContent align="end" className="w-48 backdrop-blur-md bg-white/90 border border-purple-200/50">
           <DropdownMenuLabel className="text-purple-700 font-semibold">用户中心</DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-purple-200/30" />
-
-          <DropdownMenuItem
-            onClick={() => handleUserAction("profile")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <UserCircle className="w-4 h-4 mr-2 text-blue-500" />
-            个人资料
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => handleUserAction("favorites")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <Heart className="w-4 h-4 mr-2 text-red-500" />
-            我的收藏
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => handleUserAction("history")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <History className="w-4 h-4 mr-2 text-green-500" />
-            使用历史
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator className="bg-purple-200/30" />
-
-          <DropdownMenuItem
-            onClick={() => handleUserAction("logout")}
-            className="hover:bg-red-50/50 cursor-pointer text-red-600"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            退出登录
-          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {userMenuItems.map((item, index) => (
+            <DropdownMenuItem
+              key={index}
+              className="flex items-center gap-3 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 cursor-pointer"
+            >
+              <item.icon className={`w-4 h-4 ${item.color}`} />
+              <span className="text-gray-700">{item.label}</span>
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -186,74 +173,30 @@ export function TopNavigationMenu({ className }: TopNavigationMenuProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="relative group hover:bg-gradient-to-r hover:from-purple-100/50 hover:to-pink-100/50 transition-all duration-300"
+            className="flex items-center gap-2 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 transition-all duration-300"
           >
             <motion.div
-              whileHover={{ scale: 1.05, rotate: 90 }}
+              whileHover={{ scale: 1.1, rotate: 90 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2"
+              transition={{ duration: 0.2 }}
             >
               <Settings className="w-4 h-4 text-purple-600" />
-              <ChevronDown className="w-3 h-3 text-gray-500 group-hover:text-purple-600 transition-colors" />
             </motion.div>
+            <ChevronDown className="w-3 h-3 text-gray-500" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-56 bg-white/95 backdrop-blur-md border border-purple-200/30 shadow-xl"
-        >
+        <DropdownMenuContent align="end" className="w-48 backdrop-blur-md bg-white/90 border border-purple-200/50">
           <DropdownMenuLabel className="text-purple-700 font-semibold">系统设置</DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-purple-200/30" />
-
-          <DropdownMenuItem
-            onClick={() => handleSettingsAction("ai-settings")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <Zap className="w-4 h-4 mr-2 text-yellow-500" />
-            AI 设置
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => handleSettingsAction("theme")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <Palette className="w-4 h-4 mr-2 text-pink-500" />
-            界面设置
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => handleSettingsAction("language")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <Globe className="w-4 h-4 mr-2 text-blue-500" />
-            语言设置
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => handleSettingsAction("shortcuts")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <Keyboard className="w-4 h-4 mr-2 text-green-500" />
-            快捷键
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator className="bg-purple-200/30" />
-
-          <DropdownMenuItem
-            onClick={() => handleSettingsAction("export")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <Upload className="w-4 h-4 mr-2 text-orange-500" />
-            导出设置
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => handleSettingsAction("import")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <Download className="w-4 h-4 mr-2 text-cyan-500" />
-            导入设置
-          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {settingsMenuItems.map((item, index) => (
+            <DropdownMenuItem
+              key={index}
+              className="flex items-center gap-3 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 cursor-pointer"
+            >
+              <item.icon className={`w-4 h-4 ${item.color}`} />
+              <span className="text-gray-700">{item.label}</span>
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -263,53 +206,26 @@ export function TopNavigationMenu({ className }: TopNavigationMenuProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="relative group hover:bg-gradient-to-r hover:from-purple-100/50 hover:to-pink-100/50 transition-all duration-300"
+            className="flex items-center gap-2 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 transition-all duration-300"
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex items-center gap-2">
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
               <HelpCircle className="w-4 h-4 text-purple-600" />
-              <ChevronDown className="w-3 h-3 text-gray-500 group-hover:text-purple-600 transition-colors" />
             </motion.div>
+            <ChevronDown className="w-3 h-3 text-gray-500" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-56 bg-white/95 backdrop-blur-md border border-purple-200/30 shadow-xl"
-        >
-          <DropdownMenuLabel className="text-purple-700 font-semibold">帮助中心</DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-purple-200/30" />
-
-          <DropdownMenuItem onClick={() => handleHelpAction("guide")} className="hover:bg-purple-50/50 cursor-pointer">
-            <BookOpen className="w-4 h-4 mr-2 text-blue-500" />
-            使用指南
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => handleHelpAction("quickstart")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <Zap className="w-4 h-4 mr-2 text-yellow-500" />
-            快速入门
-          </DropdownMenuItem>
-
-          <DropdownMenuItem onClick={() => handleHelpAction("faq")} className="hover:bg-purple-50/50 cursor-pointer">
-            <MessageCircle className="w-4 h-4 mr-2 text-green-500" />
-            常见问题
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => handleHelpAction("contact")}
-            className="hover:bg-purple-50/50 cursor-pointer"
-          >
-            <Phone className="w-4 h-4 mr-2 text-orange-500" />
-            联系支持
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator className="bg-purple-200/30" />
-
-          <DropdownMenuItem onClick={() => handleHelpAction("about")} className="hover:bg-purple-50/50 cursor-pointer">
-            <Info className="w-4 h-4 mr-2 text-purple-500" />
-            关于我们
-          </DropdownMenuItem>
+        <DropdownMenuContent align="end" className="w-48 backdrop-blur-md bg-white/90 border border-purple-200/50">
+          <DropdownMenuLabel className="text-purple-700 font-semibold">帮助支持</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {helpMenuItems.map((item, index) => (
+            <DropdownMenuItem
+              key={index}
+              className="flex items-center gap-3 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 cursor-pointer"
+            >
+              <item.icon className={`w-4 h-4 ${item.color}`} />
+              <span className="text-gray-700">{item.label}</span>
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
